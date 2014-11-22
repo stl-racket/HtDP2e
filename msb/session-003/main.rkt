@@ -2,6 +2,7 @@
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-beginner-reader.ss" "lang")((modname main) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
 ;; Session #3 – HtDP2e: Part 1, Sections 3 thru 3.8
+;; http://www.ccs.neu.edu/home/matthias/HtDP2e/
 
 (require 2htdp/batch-io)
 (require 2htdp/image)
