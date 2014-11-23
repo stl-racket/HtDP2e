@@ -216,5 +216,46 @@
 
 
 ;; Completed section 3.6 up to Exercise 38, as of 20 Nov 2014. Don't
+;; Exercise 38
+;; -----------
+;; WorldState -> Image
+;; places the image of the car over the BACKGROUND images such that x denotes
+;; the x coordinate of the right-most edge of the car
+(check-expect (render.re 0) (overlay/xy CAR 0 (neg Y-CAR) BACKGROUND))
+(check-expect (render.re (image-width CAR))
+              (overlay/xy CAR 0 (neg Y-CAR) BACKGROUND))
+(check-expect (render.re (+ 5 (image-width CAR)))
+              (overlay/xy CAR -5 (neg Y-CAR) BACKGROUND))
+(define (render.re x)
+  ;; implemented with "overlay" instead of "place-image" because it works better
+  ;; with the outline-mode background image
+  (overlay/xy CAR
+              ;; if the width of the car image is greater than x, then the car
+              ;; stays "parked" at the left-most edge of the BACKGROUND; a more
+              ;; advanced solution could cull the image of the car so that it
+              ;; appears to gradually enter the BACKGROUND image from the left
+              (if (< (- x (image-width CAR)) 0)
+                  0
+                  (neg (- x (image-width CAR))))
+              (neg Y-CAR)
+              BACKGROUND))
+
+
+;; WorldState -> WorldState
+;; launches the program from some initial state, where a state denotes the x
+;; coordinate of the right-most edge of the car
+(define (main.re ws)
+  (big-bang ws
+            [on-tick tock]
+            [to-draw render.re]
+            [stop-when end?]))
+
+;; When the WorldState value is >= 200, the program ends and the right-most edge
+;; of the car is flush with the right-edge of the BACKGROUND image.
+
+
+;; AnimationState is a Number
+;; interpretation the number of clock ticks since the animation started
+
 ;; forget to start leaving open the Edit -> Keybindings -> Show Active
 ;; Keybindings panel.
