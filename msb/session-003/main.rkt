@@ -215,7 +215,6 @@
             [stop-when end?]))
 
 
-;; Completed section 3.6 up to Exercise 38, as of 20 Nov 2014. Don't
 ;; Exercise 38
 ;; -----------
 ;; WorldState -> Image
@@ -257,5 +256,6 @@
 ;; AnimationState is a Number
 ;; interpretation the number of clock ticks since the animation started
 
+;; Completed section 3.6 up to Exercise 39, as of 22 Nov 2014. Don't
 ;; forget to start leaving open the Edit -> Keybindings -> Show Active
 ;; Keybindings panel.
