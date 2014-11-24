@@ -116,9 +116,6 @@
 
 ;; Exercise 35
 ;; -----------
-;; WorldState is a Number
-;; interpretation height of UFO (from top)
-
 (define WIDTH-OF-WORLD 200)
 (define WHEEL-RADIUS 5)
 (define WHEEL-DISTANCE (* WHEEL-RADIUS 5))
@@ -145,6 +142,9 @@
 
 ;; Exercise 36
 ;; -----------
+;; WorldState is a Number
+;; interpretation the number of pixels between the left border of the BACKGROUND
+;; image and the CAR image
 
 ;; WorldState -> WorldState
 ;; adds 3 to x to move the car right
