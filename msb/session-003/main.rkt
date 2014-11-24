@@ -147,7 +147,7 @@
 ;; image and the CAR image
 
 ;; WorldState -> WorldState
-;; adds 3 to x to move the car right
+;; adds 3 to x to move the CAR image to the right
 (check-expect (tock 20) 23)
 (check-expect (tock 78) 81)
 (define (tock x)
@@ -156,7 +156,6 @@
 
 ;; Exercise 37
 ;; -----------
-
 ;; Number -> Number
 ;; changes the sign of the value
 (check-expect (neg 1) -1)
@@ -185,8 +184,7 @@
      (image-height CAR)))
 
 ;; WorldState -> Image
-;; places the image of the car x pixels from the left margin of
-;; the BACKGROUND image
+;; places the CAR image x pixels from the left margin of the BACKGROUND image
 (check-expect (render 10) (overlay/xy CAR -10 (neg Y-CAR) BACKGROUND))
 (define (render x)
   ;; implemented with "overlay" instead of "place-image" because it works better
@@ -197,7 +195,8 @@
               BACKGROUND))
 
 ;; WorldState -> Boolean
-;; returns false if the value is greater than the width of the BACKGROUND image
+;; returns true if the value is greater than or equal to the width of the
+;; BACKGROUND image, otherwise return false
 (check-expect (end? 1) false)
 (check-expect (end? (image-width BACKGROUND)) true)
 (check-expect (end? (+ 3 (image-width BACKGROUND))) true)
@@ -218,21 +217,19 @@
 ;; Exercise 38
 ;; -----------
 ;; WorldState -> Image
-;; places the image of the car over the BACKGROUND images such that x denotes
-;; the x coordinate of the right-most edge of the car
+;; places the CAR image over the BACKGROUND images such that x denotes the x
+;; coordinate of the right-most edge of the CAR image
 (check-expect (render.re 0) (overlay/xy CAR 0 (neg Y-CAR) BACKGROUND))
 (check-expect (render.re (image-width CAR))
               (overlay/xy CAR 0 (neg Y-CAR) BACKGROUND))
 (check-expect (render.re (+ 5 (image-width CAR)))
               (overlay/xy CAR -5 (neg Y-CAR) BACKGROUND))
 (define (render.re x)
-  ;; implemented with "overlay" instead of "place-image" because it works better
-  ;; with the outline-mode background image
   (overlay/xy CAR
-              ;; if the width of the car image is greater than x, then the car
-              ;; stays "parked" at the left-most edge of the BACKGROUND; a more
-              ;; advanced solution could cull the image of the car so that it
-              ;; appears to gradually enter the BACKGROUND image from the left
+              ;; if the width of the CAR image is greater than x, then it stays
+              ;; "parked" at the left-most edge of the BACKGROUND; a more
+              ;; advanced solution could cull the CAR image so that it appears
+              ;; to gradually enter the BACKGROUND image from the left
               (if (< (- x (image-width CAR)) 0)
                   0
                   (neg (- x (image-width CAR))))
@@ -242,7 +239,7 @@
 
 ;; WorldState -> WorldState
 ;; launches the program from some initial state, where a state denotes the x
-;; coordinate of the right-most edge of the car
+;; coordinate of the right-most edge of the CAR image
 (define (main.re ws)
   (big-bang ws
             [on-tick tock]
@@ -250,7 +247,7 @@
             [stop-when end?]))
 
 ;; When the WorldState value is >= 200, the program ends and the right-most edge
-;; of the car is flush with the right-edge of the BACKGROUND image.
+;; of the CAR image is flush with the right-edge of the BACKGROUND image.
 
 
 ;; AnimationState is a Number
