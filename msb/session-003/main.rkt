@@ -255,7 +255,6 @@
 ;; AnimationState is a Number
 ;; interpretation the number of clock ticks since the animation started
 
-;; Completed section 3.6 up to Exercise 39, as of 22 Nov 2014. Don't
 ;; AnimationState -> AnimationState
 ;; increments the value every clock tick
 (check-expect (tock.anim 0) 1)
@@ -397,5 +396,6 @@
             [stop-when end.sine?]))
 
 
+;; Completed section 3.6 through Exercise 39, as of 24 Nov 2014. Don't
 ;; forget to start leaving open the Edit -> Keybindings -> Show Active
 ;; Keybindings panel.
