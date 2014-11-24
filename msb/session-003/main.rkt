@@ -250,9 +250,152 @@
 ;; of the CAR image is flush with the right-edge of the BACKGROUND image.
 
 
+;; Exercise 39
+;; -----------
 ;; AnimationState is a Number
 ;; interpretation the number of clock ticks since the animation started
 
 ;; Completed section 3.6 up to Exercise 39, as of 22 Nov 2014. Don't
+;; AnimationState -> AnimationState
+;; increments the value every clock tick
+(check-expect (tock.anim 0) 1)
+(check-expect (tock.anim 10) 11)
+(define (tock.anim as)
+  (+ as 1))
+
+(define RATE-PIX.anim 3)
+(define RATE-TIX.anim 1)
+
+;; AnimationState -> Image
+;; moves the left-edge of the CAR image RATE-PIX.anim pixels from the left
+;; margin of the BACKGROUND image for every RATE-TIX.anim ticks of the clock
+
+;; tests below assume that constants RATE-PIX.anim,RATE-TIX.anim have values of
+;; 1,3 respectively
+(check-expect (render.anim 0) (overlay/xy CAR 0 (neg Y-CAR) BACKGROUND))
+(check-expect (render.anim 1) (overlay/xy CAR -3 (neg Y-CAR) BACKGROUND))
+(check-expect (render.anim 2) (overlay/xy CAR -6 (neg Y-CAR) BACKGROUND))
+(check-expect (render.anim 3) (overlay/xy CAR -9 (neg Y-CAR) BACKGROUND))
+
+(define (render.anim as)
+  (overlay/xy CAR
+              (neg (quotient (* RATE-PIX.anim as) RATE-TIX.anim))
+              (neg Y-CAR)
+              BACKGROUND))
+
+;; AnimationState -> Boolean
+;; returns true if the clock ticks result in a pixel position of the right-hand
+;; side of the CAR image that is greater than or equal to the width of the
+;; BACKGROUND image, otherwise return false
+
+;; tests below assume that constants RATE-PIX.anim,RATE-TIX.anim have values of
+;; 1,3 respectively
+(check-expect (end.anim? 1) false)
+(check-expect (end.anim? 53) false)
+(check-expect (end.anim? 54) true)
+
+(define (end.anim? as)
+  (if (>= (+ (quotient (* RATE-PIX.anim as) RATE-TIX.anim) (image-width CAR))
+          (image-width BACKGROUND))
+      true
+      false))
+
+;; AnimationState -> AnimationState
+;; launches the program from some initial state, where a state denotes the
+;; number of clock ticks since the animation started
+(define (main.anim as)
+  (big-bang as
+            [on-tick tock.anim]
+            [to-draw render.anim]
+            [stop-when end.anim?]))
+
+;; main.anim works similarly to the animate function from the HtDP2e Prologue,
+;; except the clock of the latter "ticks" 28 times per second and accumulates
+;; the number of ticks automatically, while the former calls on-tick once per
+;; second and the state of the program tracks / accumulates the ticks of the
+;; clock only by convention of the programmer.
+
+
+;; design a program that moves the car according to a sine wave
+;; ------------------------------------------------------------
+
+;; Number Number Number -> Number
+;; for a value of "n * freq" radians returns an integer value that is at most
+;; "width" greater or lesser than "n", offset by "start"
+(check-expect (sine-wave (* pi 0/2) 50 1 100) 100)
+(check-expect (sine-wave (* pi 1/2) 50 1 100) 150)
+(check-expect (sine-wave (* pi 2/2) 50 1 100) 100)
+(check-expect (sine-wave (* pi 3/2) 50 1 100) 50)
+(check-expect (sine-wave (* pi 4/2) 50 1 100) 100)
+(check-expect (sine-wave (* pi 0/2 4) 50 1/4 100) 100)
+(check-expect (sine-wave (* pi 1/2 4) 50 1/4 100) 150)
+(check-expect (sine-wave (* pi 2/2 4) 50 1/4 100) 100)
+(check-expect (sine-wave (* pi 3/2 4) 50 1/4 100) 50)
+(check-expect (sine-wave (* pi 4/2 4) 50 1/4 100) 100)
+(define (sine-wave n width freq start)
+  (if (< (inexact->exact (sin (* n freq))) 0)
+      (ceiling (+ (* (inexact->exact (sin (* n freq))) width)
+                  start))
+      (floor (+ (* (inexact->exact (sin (* n freq))) width)
+                start))))
+
+(define FIX-START.sine 80)
+(define MAX-MOVE.sine 70)
+(define RATE-ADJUST.sine 1/4)
+
+;; AnimationState -> Image
+;; moves the left-edge of the CAR image a calculated number pixels from the left
+;; margin of the BACKGROUND with respect to the value of sine-wave called on the
+;; number of accumulated clock ticks and the contants MAX-MOVE.sine,
+;; RATE-ADJUST.sine, FIX-START.sine
+
+;; tests below assume that constants FIX-START.sine,MAX-MOVE.sine,
+;; RATE-ADJUST.sine have values of 80,70,1/4 respectively
+(check-expect (render.sine (* pi 0/2 4))
+              (overlay/xy CAR -80 (neg Y-CAR) BACKGROUND))
+(check-expect (render.sine (* pi 1/2 4))
+              (overlay/xy CAR -150 (neg Y-CAR) BACKGROUND))
+(check-expect (render.sine (* pi 2/2 4))
+              (overlay/xy CAR -80 (neg Y-CAR) BACKGROUND))
+(check-expect (render.sine (* pi 3/2 4))
+              (overlay/xy CAR -10 (neg Y-CAR) BACKGROUND))
+(check-expect (render.sine (* pi 4/2 4))
+              (overlay/xy CAR -80 (neg Y-CAR) BACKGROUND))
+
+(define (render.sine as)
+  (overlay/xy CAR
+              (neg (sine-wave as MAX-MOVE.sine RATE-ADJUST.sine FIX-START.sine))
+              (neg Y-CAR)
+              BACKGROUND))
+
+(define MAX-CYCLES.sine 5)
+
+;; AnimationState -> Boolean
+;; returns true if the number of accumulated clock ticks is enough to have
+;; resulted in MAX-CYCLES.sine number of cylces between the min and max return
+;; values for sine-wave called with a freq argument of RATE-ADJUST.sine,
+;; otherwise return false
+
+;; tests below assume that constants RATE-ADJUST.sine,MAX-CYCLES.sine have
+;; values of 1/4,5 respectively
+(check-expect (end.sine? 0) false)
+(check-expect (end.sine? 1) false)
+(check-expect (end.sine? (* 2 pi 4 5)) true)
+
+(define (end.sine? as)
+  (if (>= (* (/ as (* 2 pi)) RATE-ADJUST.sine) MAX-CYCLES.sine)
+      true
+      false))
+
+;; AnimationState -> AnimationState
+;; launches the program from some initial state, where a state denotes the
+;; number of clock ticks since the animation started
+(define (main.sine as)
+  (big-bang as
+            [on-tick tock.anim]
+            [to-draw render.sine]
+            [stop-when end.sine?]))
+
+
 ;; forget to start leaving open the Edit -> Keybindings -> Show Active
 ;; Keybindings panel.
