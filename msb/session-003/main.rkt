@@ -396,6 +396,439 @@
             [stop-when end.sine?]))
 
 
-;; Completed section 3.6 through Exercise 39, as of 24 Nov 2014. Don't
-;; forget to start leaving open the Edit -> Keybindings -> Show Active
-;; Keybindings panel.
+;; Exercise 40
+;; -----------
+
+;; WorldState Number Number String -> WorldState
+;; places the car at mouse position (x,y) if the mouse event is "button-down"
+(check-expect (hyper 21 10 20 "enter") 21)
+(check-expect (hyper 42 10 20 "button-down") 10)
+(check-expect (hyper 42 10 20 "move") 42)
+
+;; (define (hyper x-position-of-car x-mouse y-mouse me)
+;;   x-position-of-car)
+
+(define (hyper x-position-of-car x-mouse y-mouse me)
+  (cond
+    [(string=? "button-down" me) x-mouse]
+    [else x-position-of-car]))
+
+
+;; WorldState -> WorldState
+;; launches the program from some initial state
+(define (main.mouse ws)
+  (big-bang ws
+            [on-tick tock]
+            [on-mouse hyper]
+            [to-draw render]
+            [stop-when end?]))
+
+
+;; AllMouseEvts is an element of Image
+;; interpretation an image with markers for all mouse events
+
+;; graphical constants
+(define MT.clack (empty-scene 100 100))
+
+;; PositiveNumber -> Image
+;; records all mouse events for the specified time interval
+(define (main.clack duration)
+  (big-bang MT.clack
+            [to-draw show.clack]
+            [on-tick do-nothing.clack 1 duration]
+            [on-mouse clack]))
+
+;; AllMouseEvts Number Number String -> AllMouseEvts
+;; adds a dot at (x,y) to ws
+(check-expect
+ (clack MT.clack 10 20 "something mousy")
+ (place-image (circle 1 "solid" "red") 10 20 MT.clack))
+
+(check-expect
+ (clack (place-image (circle 1 "solid" "red") 1 2 MT.clack) 3 3 "")
+ (place-image (circle 1 "solid" "red") 3 3
+              (place-image (circle 1 "solid" "red") 1 2 MT.clack)))
+
+(define (clack ws x y action)
+  (place-image (circle 1 "solid" "red") x y ws))
+
+;; AllMouseEvts -> AllMouseEvts
+;; reveals the current world state (because it is am image)
+
+(check-expect (show.clack MT.clack) MT.clack)
+
+(define (show.clack ws)
+  ws)
+
+;; AllMouseEvts -> AllMouseEvts
+(define (do-nothing.clack ws) ws)
+
+
+;; physical constants:
+(define WIDTH.keys 100)
+(define HEIGHT.keys 30)
+
+;; graphical constant:
+(define MT.keys (empty-scene WIDTH.keys HEIGHT.keys))
+
+;; AllKeys is a String.
+;; interpretation the keys pressed since big-bang created the canvas
+
+;; AllKeys -> AllKeys
+(define (main.keys s)
+  (big-bang s
+            [on-key remember.keys]
+            [to-draw show.keys]))
+
+;; AllKeys String -> AllKeys
+;; adds ke to ak, the state of the world
+(check-expect (remember.keys "hello" " ") "hello ")
+(check-expect (remember.keys "hello " "w") "hello w")
+
+(define (remember.keys ak ke)
+  (string-append ak ke))
+
+;; AllKeys -> Image
+;; renders the string as a text and place it into MT
+(check-expect (show.keys "hel") (overlay (text "hel" 11 "red") MT.keys))
+(check-expect (show.keys "mark") (overlay (text "mark" 11 "red") MT.keys))
+
+(define (show.keys ak)
+  (overlay (text ak 11 "red") MT.keys))
+
+
+;; Exercise 41
+;; -----------
+
+(define MT.keys.align-left
+  (rectangle WIDTH.keys HEIGHT.keys "outline" "black"))
+
+;; AllKeys -> Image
+;; renders the string as framed left-aligned text
+(check-expect (show.keys.align-left "hel")
+              (overlay/align "left" "middle"
+                             (text "hel" 11 "red")
+                             MT.keys.align-left))
+(check-expect (show.keys.align-left "mark")
+              (overlay/align "left" "middle"
+                             (text "mark" 11 "red")
+                             MT.keys.align-left))
+
+(define (show.keys.align-left ak)
+  (overlay/align "left" "middle"
+                 (text ak 11 "red")
+                 MT.keys.align-left))
+
+;; AllKeys -> AllKeys
+(define (main.keys.align-left s)
+  (big-bang s
+            [on-key remember.keys]
+            [to-draw show.keys.align-left]))
+
+
+;; Exercise 42
+;; -----------
+
+;; AllKeys String -> AllKeys
+;; adds ke to ak, the state of the world, ignoring all key strokes represented
+;; by one-character strings
+(check-expect (remember.keys.ignore "hello " "w") "hello ")
+(check-expect (remember.keys.ignore "hello " "\t") "hello ")
+(check-expect (remember.keys.ignore "hello " "\r") "hello ")
+(check-expect (remember.keys.ignore "hello " "up") "hello up")
+(check-expect (remember.keys.ignore "hello " "down") "hello down")
+
+(define (remember.keys.ignore ak ke)
+  (cond
+    [(= (string-length ke) 1) ak]
+    [else (string-append ak ke)]))
+
+;; AllKeys -> AllKeys
+(define (main.keys.ignore s)
+  (big-bang s
+            [on-key remember.keys.ignore]
+            [to-draw show.keys.align-left]))
+
+
+;; Exercise 43
+;; -----------
+(define CAT (bitmap/file "cat.png"))
+(define WIDTH.vpet (* 5 (image-width CAT)))
+(define HEIGHT.vpet (ceiling (* 3/2 (image-height CAT))))
+(define BACKGROUND.vpet (rectangle WIDTH.vpet HEIGHT.vpet "outline" "black"))
+(define Y-CAT (neg (- (image-height BACKGROUND.vpet) (image-height CAT))))
+(define RATE.vpet 3)
+(define CYCLES.vpet 2)
+(define DURATION.vpet
+  (ceiling (* (/ (image-width BACKGROUND.vpet) RATE.vpet)
+              CYCLES.vpet)))
+
+;; WorldState is a Number
+;; interpretation the number of clock ticks since the program was started
+
+;; WorldState -> WorldState
+;; adds 1 to x to track the number of clock ticks
+(check-expect (tock.vpet 20) 21)
+(check-expect (tock.vpet 78) 79)
+(define (tock.vpet x)
+  (+ 1 x))
+
+;; WorldState -> Number
+;; returns an x coordinate that is 3 times the number of clock ticks since the
+;; the program started, modulo the width fo the BACKGROUND.vpet image
+(check-expect (xpos.vpet 0) 0)
+(check-expect (xpos.vpet 10) (* 10 3))
+(check-expect (xpos.vpet (+ 10 (* 1 (image-width BACKGROUND.vpet)))) (* 10 3))
+(check-expect (xpos.vpet (+ 10 (* 5 (image-width BACKGROUND.vpet)))) (* 10 3))
+(define (xpos.vpet ws)
+  (modulo (* RATE.vpet ws)
+          (image-width BACKGROUND.vpet)))
+
+;; Image -> Image
+;; Crops the CAT image to the rectangle with the upper left at the point (x,0)
+;; and with width equal to the width argument and height equal to the height of
+;; the CAT image
+(check-expect (crop-cat 0 (image-width CAT)) CAT)
+(define (crop-cat x width)
+  (crop x 0
+        width
+        (image-height CAT)
+        CAT))
+
+;; WorldState -> Image
+;; advances the left edge of the CAT image 3 pixels per clock tick to the right
+;; of the left edge of the BACKGROUND.vpet image, modulo the width of the
+;; BACKGROUND.vpet image; if the right edge of the CAT image extends beyond the
+;; width of the BACKGROUND.vpet image, then the CAT image is cropped such that
+;; its right edge edge is flush with the right edge of the background and the
+;; cropped portion appears with its left edge flush with the left edge of the
+;; background
+(check-expect (render.vpet 0)
+              (overlay/xy
+               CAT
+               0
+               Y-CAT
+               BACKGROUND.vpet))
+(check-expect (render.vpet 104)
+              ;; 104 * 3 = 312
+              ;; 312 + (image-width CAT) = 387
+              ;; (image-width BACKGROUND.vpet) = 375
+              ;; so the rightmost 12 pixels (in the x direction) of the CAT
+              ;; image should be cropped
+              (overlay/xy
+               (crop-cat
+                (- (image-width CAT) 12)
+                (image-width CAT))
+               0
+               Y-CAT
+               (overlay/xy
+                (crop-cat
+                 0
+                 (- (image-width CAT) 12))
+                -312
+                Y-CAT
+                BACKGROUND.vpet)))
+(define (render.vpet ws)
+  (cond
+    [(> (+ (image-width CAT)
+           (xpos.vpet ws))
+        (image-width BACKGROUND.vpet))
+     (overlay/xy
+      (crop-cat
+       (- (image-width BACKGROUND.vpet)
+          (xpos.vpet ws))
+       (image-width CAT))
+      0
+      Y-CAT
+      (overlay/xy
+       (crop-cat
+        0
+        (- (image-width BACKGROUND.vpet)
+           (xpos.vpet ws)))
+       (neg (xpos.vpet ws))
+       Y-CAT
+       BACKGROUND.vpet))]
+    [else (overlay/xy
+           CAT
+           (neg (xpos.vpet ws))
+           Y-CAT
+           BACKGROUND.vpet)]))
+
+;; WorldState -> WorldState
+(define (main.vpet ws)
+  (big-bang ws
+            [to-draw render.vpet]
+            [on-tick tock.vpet 1/28 DURATION.vpet]))
+
+
+;; Exercise 44
+;; -----------
+(define CAT-EVEN CAT)
+(define CAT-ODD (bitmap/file "cat2.png"))
+
+;; the two images are the same height, so Y-CAT does not need to be refactored
+(check-expect (image-height CAT-EVEN) (image-height CAT-ODD))
+
+;; Number -> Image
+;; returns one or the other cat image depending on whether x is odd
+(check-expect (tog-cat 0) CAT-EVEN)
+(check-expect (tog-cat 1) CAT-ODD)
+(check-expect (tog-cat 2) CAT-EVEN)
+(check-expect (tog-cat 9) CAT-ODD)
+(check-expect (tog-cat 10) CAT-EVEN)
+(define (tog-cat x)
+  (cond [(odd? x) CAT-ODD]
+        [else CAT-EVEN]))
+
+;; Image -> Image
+;; Crops the CAT-EVEN or CAT-ODD image to the rectangle with the upper left at
+;; the point (x,0) and with width equal to the width argument and height equal
+;; to the height of one or the other cat image
+(check-expect (crop-cat.tog 0 (image-width CAT) 1) CAT-ODD)
+(check-expect (crop-cat.tog 0 (image-width CAT) 2) CAT-EVEN)
+(define (crop-cat.tog x width xpos)
+  (crop x 0
+        width
+        (image-height (tog-cat xpos))
+        (tog-cat xpos)))
+
+;; WorldState -> Image
+;; advances the left edge of the CAT-EVEN or CAT-ODD image 3 pixels per clock
+;; tick to the right of the left edge of the BACKGROUND.vpet image, modulo the
+;; width of the BACKGROUND.vpet image; if the right edge of one or the other CAT
+;; image extends beyond the width of the BACKGROUND.vpet image, then the cat
+;; image is cropped such that its right edge edge is flush with the right edge
+;; of the background and the cropped portion appears with its left edge flush
+;; with the left edge of the background
+(check-expect (render.vpet.tog 0)
+              (overlay/xy
+               CAT-EVEN
+               0
+               Y-CAT
+               BACKGROUND.vpet))
+(check-expect (render.vpet.tog 105)
+              ;; 105 * 3 = 315, an odd number
+              ;; 315 + (image-width CAT) = 390
+              ;; (image-width BACKGROUND.vpet) = 375
+              ;; so the rightmost 15 pixels (in the x direction) of the CAT-ODD
+              ;; image should be cropped
+              (overlay/xy
+               (crop-cat.tog
+                (- (image-width CAT-ODD) 15)
+                (image-width CAT-ODD)
+                315)
+               0
+               Y-CAT
+               (overlay/xy
+                (crop-cat.tog
+                 0
+                 (- (image-width CAT-ODD) 15)
+                 315)
+                -315
+                Y-CAT
+                BACKGROUND.vpet)))
+(define (render.vpet.tog ws)
+  (cond
+    [(> (+ (image-width (tog-cat ws))
+           (xpos.vpet ws))
+        (image-width BACKGROUND.vpet))
+     (overlay/xy
+      (crop-cat.tog
+       (- (image-width BACKGROUND.vpet)
+          (xpos.vpet ws))
+       (image-width (tog-cat ws))
+       (xpos.vpet ws))
+      0
+      Y-CAT
+      (overlay/xy
+       (crop-cat.tog
+        0
+        (- (image-width BACKGROUND.vpet)
+           (xpos.vpet ws))
+        (xpos.vpet ws))
+       (neg (xpos.vpet ws))
+       Y-CAT
+       BACKGROUND.vpet))]
+    [else (overlay/xy
+           (tog-cat ws)
+           (neg (xpos.vpet ws))
+           Y-CAT
+           BACKGROUND.vpet)]))
+
+;; WorldState -> WorldState
+(define (main.vpet.tog ws)
+  (big-bang ws
+            [to-draw render.vpet.tog]
+            [on-tick tock.vpet 1/28 DURATION.vpet]))
+
+
+;; Exercise 45
+;; -----------
+
+;; Happiness is a Number.
+;; interpretation the current value of the happiness gauge.
+
+;; the initial Happiness value when the main.happy program is started
+(define INIT-HAPPY 100)
+(define MAX-HAPPY 100)
+
+;; Happiness -> Happiness
+;; with each clock tick, happiness decreases by -0.1, or the difference between
+;; the happiness value and 0, but never returns less than 0
+(check-expect (tock.happy 0) 0)
+(check-expect (tock.happy (- 1/3 3/10)) 0)
+(check-expect (tock.happy 1/10) 0)
+(check-expect (tock.happy 10) 99/10)
+(define (tock.happy h)
+  (cond
+    [(< h 1/10) 0]
+    [else (- h 1/10)]))
+
+;; Happiness String -> Happiness
+;; every time the down arrow key is pressed, happiness increases by 1/5; every
+;; time the up arrow is pressed, happiness jumps by 1/3; other keys are ignored;
+;; if the increased happiness is greater than MAX-HAPPY, MAX-HAPPY is returned
+(check-expect (adjust.happy 1/5 "up") 2/5)
+(check-expect (adjust.happy MAX-HAPPY "up") MAX-HAPPY)
+(check-expect (adjust.happy 2/3 "down") 3/3)
+(check-expect (adjust.happy MAX-HAPPY "down") MAX-HAPPY)
+(check-expect (adjust.happy 10 "left") 10)
+(define (adjust.happy h k)
+  (cond
+    [(key=? k "up") (if (> (+ h 1/5) MAX-HAPPY) MAX-HAPPY (+ h 1/5))]
+  [(key=? k "down") (if (> (+ h 1/3) MAX-HAPPY) MAX-HAPPY (+ h 1/3))]
+  [else h]))
+
+;; background image for the gauge
+(define BACKGROUND.happy
+  (rectangle (+ 6 MAX-HAPPY) (* 1/5 MAX-HAPPY) "outline" "black"))
+
+;; Happiness -> Image
+;; desc...
+(check-expect (image-width (gauge.happy 10)) 10)
+(check-expect (image-width (gauge.happy 20)) 20)
+(check-expect (image-height (gauge.happy 10))
+              (- (image-height BACKGROUND.happy) 6))
+(check-expect (image-height (gauge.happy 20))
+              (- (image-height BACKGROUND.happy) 6))
+(define (gauge.happy h)
+  (rectangle h (- (image-height BACKGROUND.happy) 6) "solid" "red"))
+
+;; Happiness -> Image
+;; overlays a gauge image generated with h on the BACKGROUND.happy image, offset
+;; by 4 pixels from the left and top of the background
+(define (render.happy h)
+  (overlay/xy
+   (gauge.happy h)
+   -4
+   -4
+   BACKGROUND.happy))
+
+;; Happiness -> Happiness
+(define (main.happy _)
+  ;; BSL requires that function definitions have at least one parameter; in this
+  ;; case, it will be ignored (whatever it is) when the function is called
+  (big-bang INIT-HAPPY
+            [on-tick tock.happy]
+            [on-key adjust.happy]
+            [to-draw render.happy]))
