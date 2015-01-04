@@ -6,3 +6,34 @@
 
 ;; 06 Dec 2014, LockerDome conference room
 ;; vnc server:  192.168.88.126, password:  racket
+
+(define (foo x) (+ 1 x))
+
+(foo 1)
+{foo 2}
+[foo 1]
+
+(define (reward s)
+  (cond
+    [(<= 0 s 10) "bronze"]
+    [(and (< 10 s) (<= s 20)) "silver"]
+    [else "gold"]))
+
+#|
+function cond() {
+  var conds = Array.prototype.slice.call(arguments);
+  for (var i = 0; i < conds.length; ++i) {
+    var branch = conds[i];
+    if (branch[0]()) return branch[1]();
+  }
+}
+
+function reward(s) {
+  return cond(
+    [function () { return 0 <= s }, function () { return "bronze" }],
+    [function () { return 10 < s && s <= 20 }, function () { return "silver" }],
+    [function () { return true; }, function () { return "gold" }]
+  );
+}
+
+|#
