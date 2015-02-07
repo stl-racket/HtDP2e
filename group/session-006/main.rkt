@@ -36,10 +36,22 @@
                         (make-posn 200 200)
                         (make-velocity 5 0))))
 
+(define (actor-posn-x actor)
+  (posn-x (actor-posn actor)))
+(define (actor-posn-y actor)
+  (posn-y (actor-posn actor)))
+
+(define (actor-vel-x actor)
+  (velocity-dx (actor-vel actor)))
+(define (actor-vel-y actor)
+  (velocity-dy (actor-vel actor)))
+
+
+
 (define (update-posn actor)
   (make-actor (make-posn
-               (modulo (+ (posn-x (actor-posn actor)) (velocity-dx (actor-vel actor))) (image-width SCENE)) 
-               (modulo (+ (posn-y (actor-posn actor)) (velocity-dy (actor-vel actor))) (image-height SCENE)))
+               (modulo (+ (actor-posn-x actor) (actor-vel-dx actor)) (image-width SCENE))
+               (modulo (+ (actor-posn-y actor) (actor-vel-dy actor)) (image-height SCENE)))
               (actor-vel actor)))
   
   (define (update-world w)
