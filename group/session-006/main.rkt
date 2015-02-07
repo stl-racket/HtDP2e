@@ -22,7 +22,12 @@
 (define PADDLE (rectangle 10 40 "solid" "gray"))
 (define BALL (square 10 "solid" "red"))
 (define CANVAS (rectangle 400 300 "solid" "black"))
-(define NET (scene+line CANVAS (/ 400 2) 0 (/ 400 2) 300 (make-pen "gray" 10 "dot" "butt" "bevel")))
+(define NET (scene+line CANVAS
+                        (/ 400 2)
+                        0
+                        (/ 400 2)
+                        300
+                        (make-pen "gray" 10 "dot" "butt" "bevel")))
 (define SCENE (overlay NET CANVAS))
 
 (define INITIAL_WORLD (make-world
@@ -46,64 +51,66 @@
 (define (actor-vel-y actor)
   (velocity-dy (actor-vel actor)))
 
-
-
 (define (update-posn actor)
   (make-actor (make-posn
-               (modulo (+ (actor-posn-x actor) (actor-vel-dx actor)) (image-width SCENE))
-               (modulo (+ (actor-posn-y actor) (actor-vel-dy actor)) (image-height SCENE)))
+               (modulo (+ (actor-posn-x actor)
+                          (actor-vel-x actor))
+                       (image-width SCENE))
+               (modulo (+ (actor-posn-y actor)
+                          (actor-vel-y actor))
+                       (image-height SCENE)))
               (actor-vel actor)))
-  
-  (define (update-world w)
-    (make-world
-     (update-posn (world-paddle1 w))
-     (update-posn (world-paddle2 w))
-     (update-posn (world-ball w))))
 
-  (define (update-velocity actor velocity)
-    (make-actor (actor-posn actor)
-                velocity))
-  
+(define (update-world w)
+  (make-world
+   (update-posn (world-paddle1 w))
+   (update-posn (world-paddle2 w))
+   (update-posn (world-ball w))))
+
+(define (update-velocity actor velocity)
+  (make-actor (actor-posn actor)
+              velocity))
+
 (define (handle-key w k)
   (cond
     [(key=? k "w")
      (make-world
-        (update-velocity (world-paddle1 w) (make-velocity 0 -10)) 
-        (world-paddle2 w)
-        (world-ball w))]
+      (update-velocity (world-paddle1 w) (make-velocity 0 -10))
+      (world-paddle2 w)
+      (world-ball w))]
     [(key=? k "s")
      (make-world
-        (update-velocity (world-paddle1 w) (make-velocity 0 10)) 
-        (world-paddle2 w)
-        (world-ball w))]
+      (update-velocity (world-paddle1 w) (make-velocity 0 10))
+      (world-paddle2 w)
+      (world-ball w))]
     [(key=? k "up")
      (make-world
-        (world-paddle1 w)
-        (update-velocity (world-paddle2 w) (make-velocity 0 -10)) 
-        (world-ball w))]
+      (world-paddle1 w)
+      (update-velocity (world-paddle2 w) (make-velocity 0 -10))
+      (world-ball w))]
     [(key=? k "down")
      (make-world
-        (world-paddle1 w)
-        (update-velocity (world-paddle2 w) (make-velocity 0 10)) 
-        (world-ball w))]
-     [else
-       w])
+      (world-paddle1 w)
+      (update-velocity (world-paddle2 w) (make-velocity 0 10))
+      (world-ball w))]
+    [else
+     w])
   )
 
 (define (handle-release w k)
   (cond
     [(or (key=? k "w") (key=? k "s"))
      (make-world
-        (update-velocity (world-paddle1 w) (make-velocity 0 0)) 
-        (world-paddle2 w)
-        (world-ball w))]
+      (update-velocity (world-paddle1 w) (make-velocity 0 0))
+      (world-paddle2 w)
+      (world-ball w))]
     [(or (key=? k "up")(key=? k "down"))
      (make-world
-        (world-paddle1 w)
-        (update-velocity (world-paddle2 w) (make-velocity 0 0)) 
-        (world-ball w))]
-     [else
-       w])
+      (world-paddle1 w)
+      (update-velocity (world-paddle2 w) (make-velocity 0 0))
+      (world-ball w))]
+    [else
+     w])
   )
 
 (define (render w)
@@ -132,4 +139,3 @@
 ; TODO
 ; Velocities
 ; Collisions
-; 
