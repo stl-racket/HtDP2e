@@ -8,6 +8,8 @@ Members and newcomers who did not have time to work through the material are sti
 
 At the start of each session, the moderator (probably me most of the time, but other members are welcome to fill that role) will open a brief roundtable discussion to address any questions or difficulties encountered during our individual studies. The shared laptop will be synced with the GitHub repo, and anyone who wishes to share code via Dropbox can do so at that time.
 
-The group will then begin working collaboratively on some project determined in advance of the meeting, as announced on the session's event-page. Participants are encouraged to attempt the project on their own (in whole or part) leading up to the session. Experience and insights gained in the process can then be shared with the group as we work hard to complete our project during the course of the meeting (which should last approx. 90 minutes).
+The group will then begin working on some project determined in advance of the meeting, as announced on the session's event-page. Collaborative coding is done in the context of a [Floobits](https://floobits.com/) workspace; the group account is listed under [stl-racket-laptop](https://floobits.com/stl-racket-laptop). Connections can be made anonymously or with a free account &mdash; either is sufficient for participation in group sessions.
+
+Participants are encouraged to attempt the group project on their own (in whole or part) leading up to the session. Experience and insights gained in the process can then be shared with the group as we work hard to complete our project during the course of the meeting (which should last approx. 90 minutes).
 
 Finally, the session will wrap up with another brief roundtable discussion to decide how much material we want to cover in the next session and to air ideas for our next group project.
