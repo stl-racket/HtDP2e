@@ -83,7 +83,7 @@
   (one-cycle-left? (game-state-cycles gs)))
 
 (define (one-cycle-left? cycles)
-  (= (count-live-cycles cycles 0)) 1)
+  (= (count-live-cycles cycles 0) 1))
 
 (define (count-live-cycles cycles count)
   (cond 
